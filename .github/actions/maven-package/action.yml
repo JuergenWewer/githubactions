@@ -1,0 +1,26 @@
+name: "Maven Package"
+description: "Baut das Projekt mit Maven"
+inputs:
+  java-version:
+    description: "Java Version"
+    default: "17"
+  distribution:
+    description: "JDK Distribution"
+    default: "temurin"
+  maven-args:
+    description: "Zusätzliche Maven Argumente"
+    default: "-B -DskipTests=false"
+runs:
+  using: "composite"
+  steps:
+    - name: Setup Java
+      uses: actions/setup-java@v4
+      with:
+        distribution: ${{ inputs.distribution }}
+        java-version: ${{ inputs.java-version }}
+        cache: maven
+
+    - name: Build with Maven
+      shell: bash
+      run: |
+        mvn ${{ inputs.maven-args }} clean package

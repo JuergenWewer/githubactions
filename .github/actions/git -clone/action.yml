@@ -1,0 +1,10 @@
+name: "Git Clone"
+description: "Checkt das Repo aus"
+runs:
+  using: "composite"
+  steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+        # lfs: true  # falls ihr Git LFS nutzt
