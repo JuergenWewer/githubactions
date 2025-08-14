@@ -1,0 +1,47 @@
+name: "Master JAR Push"
+description: "Veröffentlicht JAR auf master: GitHub Packages (Maven) und als Workflow-Artefakt"
+inputs:
+  java-version:
+    default: "17"
+  distribution:
+    default: "temurin"
+  publish-to-github-packages:
+    description: "true/false – nach GitHub Packages deployen"
+    default: "true"
+runs:
+  using: "composite"
+  steps:
+    - name: Abbruch wenn nicht master
+      if: ${{ github.ref != 'refs/heads/master' }}
+      shell: bash
+      run: |
+        echo "Nicht master – Überspringe Publish."
+        exit 0
+
+    - name: Setup Java (mit Server-Creds für Maven Deploy)
+      if: ${{ inputs.publish-to-github-packages == 'true' }}
+      uses: actions/setup-java@v4
+      with:
+        distribution: ${{ inputs.distribution }}
+        java-version: ${{ inputs.java-version }}
+        cache: maven
+        server-id: github
+        server-username: GITHUB_ACTOR
+        server-password: ${{ env.GITHUB_TOKEN }}
+
+    - name: Deploy zu GitHub Packages (Maven)
+      if: ${{ inputs.publish-to-github-packages == 'true' }}
+      shell: bash
+      env:
+        GITHUB_TOKEN: ${{ env.GITHUB_TOKEN }}
+      run: |
+        # Voraussetzung: <distributionManagement> in eurer pom.xml zeigt auf GitHub Packages
+        mvn -B -DskipTests=true deploy
+
+    - name: JARs als Workflow-Artefakt hochladen
+      uses: actions/upload-artifact@v4
+      with:
+        name: jars-${{ github.sha }}
+        path: |
+          **/target/*.jar
+        if-no-files-found: error
