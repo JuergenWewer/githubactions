@@ -1,0 +1,62 @@
+name: CI
+
+on:
+  push:
+    branches: [ master, main, feature/** ]
+  pull_request:
+    branches: [ master, main ]
+
+permissions:
+  contents: read
+  packages: write   # nötig für GitHub Packages Publish
+  # id-token: write # nur falls ihr OIDC für externe Deploys nutzt
+
+env:
+  SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}  # aus Repo/Org Secrets
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # automatisch gesetzt, hier explizit gemacht
+
+jobs:
+  clone:
+    name: git-clone
+    runs-on: ubuntu-latest
+    steps:
+      - uses: ./.github/actions/git-clone
+
+  build:
+    name: maven-package
+    runs-on: ubuntu-latest
+    needs: clone
+    steps:
+      - uses: ./.github/actions/git-clone
+      - uses: ./.github/actions/maven-package
+        with:
+          java-version: "17"
+          distribution: "temurin"
+          maven-args: "-B -DskipTests=false"
+
+  sonar:
+    name: sonar-qube-scan
+    runs-on: ubuntu-latest
+    needs: build
+    if: ${{ github.event_name != 'pull_request' || github.actor != 'dependabot[bot]' }}
+    steps:
+      - uses: ./.github/actions/git-clone
+      - uses: ./.github/actions/sonar-qube-scan
+        with:
+          java-version: "17"
+          sonar-host-url: ${{ secrets.SONAR_HOST_URL }} # z.B. https://sonarqube.example.com
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+  publish:
+    name: master-jar-push
+    runs-on: ubuntu-latest
+    needs: [build, sonar]
+    steps:
+      - uses: ./.github/actions/git-clone
+      - uses: ./.github/actions/master-jar-push
+        with:
+          java-version: "17"
+          publish-to-github-packages: "true"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
