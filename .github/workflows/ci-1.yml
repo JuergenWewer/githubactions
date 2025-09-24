@@ -1,0 +1,27 @@
+name: Build (self-hosted SUSE)
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  build:
+    runs-on: linux
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Install tools via zypper
+        run: |
+          sudo zypper -n ref
+          sudo zypper -n in --no-recommends git maven java-17-openjdk-headless ca-certificates
+
+      - name: Cache Maven repository
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-m2-
+
+      - name: Build with Maven
+        run: mvn -B clean install
