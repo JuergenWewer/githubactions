@@ -1,0 +1,99 @@
+<!-- ==============================================
+    Testcontainers + JUnit setup (add to your POM)
+================================================== -->
+<properties>
+  <maven.compiler.source>17</maven.compiler.source>
+  <maven.compiler.target>17</maven.compiler.target>
+  <junit.jupiter.version>5.10.2</junit.jupiter.version>
+  <testcontainers.version>1.19.7</testcontainers.version>
+</properties>
+
+<dependencyManagement>
+  <dependencies>
+    <dependency>
+      <groupId>org.testcontainers</groupId>
+      <artifactId>testcontainers-bom</artifactId>
+      <version>${testcontainers.version}</version>
+      <type>pom</type>
+      <scope>import</scope>
+    </dependency>
+  </dependencies>
+</dependencyManagement>
+
+<dependencies>
+  <dependency>
+    <groupId>org.junit.jupiter</groupId>
+    <artifactId>junit-jupiter</artifactId>
+    <version>${junit.jupiter.version}</version>
+    <scope>test</scope>
+  </dependency>
+  <dependency>
+    <groupId>org.testcontainers</groupId>
+    <artifactId>junit-jupiter</artifactId>
+    <scope>test</scope>
+  </dependency>
+  <dependency>
+    <groupId>org.testcontainers</groupId>
+    <artifactId>kafka</artifactId>
+    <scope>test</scope>
+  </dependency>
+  <dependency>
+    <groupId>org.testcontainers</groupId>
+    <artifactId>localstack</artifactId>
+    <scope>test</scope>
+  </dependency>
+  <dependency>
+    <groupId>org.testcontainers</groupId>
+    <artifactId>oracle-xe</artifactId>
+    <scope>test</scope>
+  </dependency>
+  <dependency>
+    <groupId>org.apache.kafka</groupId>
+    <artifactId>kafka-clients</artifactId>
+    <version>3.7.0</version>
+    <scope>test</scope>
+  </dependency>
+  <dependency>
+    <groupId>software.amazon.awssdk</groupId>
+    <artifactId>s3</artifactId>
+    <version>2.25.55</version>
+    <scope>test</scope>
+  </dependency>
+  <dependency>
+    <groupId>com.oracle.database.jdbc</groupId>
+    <artifactId>ojdbc11</artifactId>
+    <version>23.4.0.24.05</version>
+    <scope>test</scope>
+  </dependency>
+</dependencies>
+
+<build>
+  <plugins>
+    <plugin>
+      <groupId>org.apache.maven.plugins</groupId>
+      <artifactId>maven-surefire-plugin</artifactId>
+      <version>3.2.5</version>
+      <configuration>
+        <useModulePath>false</useModulePath>
+      </configuration>
+    </plugin>
+  </plugins>
+</build>
+
+<profiles>
+  <profile>
+    <id>with-testcontainers</id>
+    <activation>
+      <activeByDefault>true</activeByDefault>
+    </activation>
+    <properties>
+      <test.env>local</test.env>
+    </properties>
+  </profile>
+  <profile>
+    <id>k8s-smoke</id>
+    <properties>
+      <test.env>k8s</test.env>
+    </properties>
+  </profile>
+</profiles>
