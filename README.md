@@ -25,3 +25,6 @@ Artefakt: `target/quarkus-lib-example-0.1.0.jar`
 
 ## Quarkus-Hinweis
 Die Bibliothek ist **Quarkus-freundlich**: `GreetingService` ist mit `@Singleton` annotiert. In Quarkus-Projekten kann der Service per CDI injiziert werden, in normalen Java-Projekten ganz regulär instanziiert.
+
+mvn clean verify sonar:sonar \
+-Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml
