@@ -33,3 +33,6 @@ mvn clean verify sonar:sonar \
   timeout-minutes: 15
   env:
   SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+echo "Jacoco XMLs:"
+find . -name jacoco.xml -maxdepth 4 -print -exec ls -l {} \;
