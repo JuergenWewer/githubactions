@@ -28,3 +28,8 @@ Die Bibliothek ist **Quarkus-freundlich**: `GreetingService` ist mit `@Singleton
 
 mvn clean verify sonar:sonar \
 -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml
+
+- uses: SonarSource/sonarqube-quality-gate-action@master
+  timeout-minutes: 15
+  env:
+  SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
